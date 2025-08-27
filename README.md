@@ -1,4 +1,4 @@
-# 🚀 GLPI 11.x Automated Installation Script
+# 🚀 GLPI 11.x Automated Pre-Installation Script
 
 This project provides a **secure and automated Bash script** to install **GLPI 11.x** on a Debian/Ubuntu server.  
 The script configures Apache, MariaDB, PHP 8.2, and generates a **self-signed SSL certificate** for HTTPS access.  
