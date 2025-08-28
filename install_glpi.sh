@@ -53,7 +53,7 @@ install_if_missing() {
 # 1. Mise à jour des dépôts
 # ===============================
 msg_info "=== [1/8] Mise à jour des dépôts ==="
-apt-get update -y && apt-get upgrade -y
+apt-get update && apt-get upgrade -y
 msg_ok "Dépôts mis à jour."
 
 # ===============================
@@ -164,21 +164,30 @@ chmod 640 "$CONFIG_FILE"
 msg_ok "Fichier config_db.php créé et sécurisé."
 
 # ===============================
-# 7. Création certificat SSL auto-signé
+# 7. Création certificat SSL auto-signé ECDSA
 # ===============================
-msg_info "=== [7/8] Création certificat SSL auto-signé ==="
+msg_info "=== [7/8] Création certificat SSL auto-signé ECDSA ==="
+
+# Créer le dossier si nécessaire
 mkdir -p "$SSL_DIR"
+
+# Générer la clé ECDSA (courbe prime256v1)
+openssl ecparam -name prime256v1 -genkey -noout -out "$SSL_DIR/$DOMAIN_NAME.key"
+
+# Générer le certificat auto-signé
 openssl req -x509 -nodes -days 365 \
-  -newkey rsa:2048 \
-  -keyout "$SSL_DIR/$DOMAIN_NAME.key" \
+  -key "$SSL_DIR/$DOMAIN_NAME.key" \
   -out "$SSL_DIR/$DOMAIN_NAME.crt" \
   -subj "/C=FR/ST=Occitanie/L=Sete/O=IT-Connect/OU=IT/CN=$DOMAIN_NAME"
-msg_ok "Certificat SSL auto-signé créé."
+
+msg_ok "Certificat SSL auto-signé ECDSA créé."
 
 # ===============================
-# 8. Configuration Apache HTTPS
+# 8. Configuration Apache HTTPS avec HTTP/2
 # ===============================
-msg_info "=== [8/8] Configuration Apache HTTPS ==="
+msg_info "=== [8/8] Configuration Apache HTTPS avec HTTP/2 ==="
+
+# Créer le fichier de configuration SSL pour Apache
 cat > "/etc/apache2/sites-available/glpi-ssl.conf" <<EOF
 <VirtualHost *:443>
     ServerName $DOMAIN_NAME
@@ -187,6 +196,9 @@ cat > "/etc/apache2/sites-available/glpi-ssl.conf" <<EOF
     SSLEngine on
     SSLCertificateFile $SSL_DIR/$DOMAIN_NAME.crt
     SSLCertificateKeyFile $SSL_DIR/$DOMAIN_NAME.key
+
+    # Activer HTTP/2
+    Protocols h2 http/1.1
 
     <Directory $GLPI_DIR/public>
         Require all granted
@@ -202,10 +214,17 @@ cat > "/etc/apache2/sites-available/glpi-ssl.conf" <<EOF
 </VirtualHost>
 EOF
 
+# Activer les modules nécessaires
 a2enmod ssl
+a2enmod http2
+
+# Activer le site SSL
 a2ensite glpi-ssl.conf
+
+# Recharger Apache pour appliquer les changements
 systemctl reload apache2
-msg_ok "Apache configuré pour HTTPS avec certificat auto-signé."
+
+msg_ok "Apache configuré pour HTTPS avec certificat ECDSA et HTTP/2."
 
 # ===============================
 # Ouverture automatique du navigateur si possible
