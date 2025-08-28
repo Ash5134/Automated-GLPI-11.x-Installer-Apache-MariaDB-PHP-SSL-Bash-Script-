@@ -1,7 +1,7 @@
 # 🚀 GLPI 11.x Automated Pre-Installation Script (v1.3)
 
 ![Bash](https://img.shields.io/badge/Script-Bash-green)
-![Debian](https://img.shields.io/badge/OS-Debian%2FUbuntu-blue)
+![Debian](https://img.shields.io/badge/OS-Debian)
 ![Version](https://img.shields.io/badge/Version-1.3-orange)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
