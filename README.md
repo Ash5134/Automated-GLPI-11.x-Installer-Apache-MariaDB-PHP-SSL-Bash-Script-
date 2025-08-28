@@ -123,6 +123,3 @@ MIT License — free to use, modify, and distribute with attribution.
 * [GLPI Project](https://glpi-project.org/)
 * Inspired by sysadmin automation practices
 
-
-Veux‑tu que je fasse ça ?
-```
